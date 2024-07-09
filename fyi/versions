@@ -1,6 +1,6 @@
 File: semgrep-grammars/src/tree-sitter-move-on-aptos/LICENSE
 Git repo name: tree-sitter-move-on-aptos
-Latest commit in repo: ce1a8ff1b95005ae45e3674c00e795aac24aec35
+Latest commit in repo: 3235a9fc83872d7d20800b0713f7c6e9966442d1
 Last change in file:
   commit 5d7db449f55cc726c400e6f5d501d934c380f53e
   Author: Andrea Cappa (zi0Black) <13380579+zi0Black@users.noreply.github.com>
@@ -10,21 +10,21 @@ Last change in file:
 ---
 File: semgrep-grammars/src/tree-sitter-move-on-aptos/grammar.js
 Git repo name: tree-sitter-move-on-aptos
-Latest commit in repo: ce1a8ff1b95005ae45e3674c00e795aac24aec35
+Latest commit in repo: 3235a9fc83872d7d20800b0713f7c6e9966442d1
 Last change in file:
-  commit 4c0b0e062277a08a17cd558754b431107546ea94
+  commit e6d412dcd503b99308f75b596da66c26f491ece8
   Author: ArArgon <liaozping@gmail.com>
-  Date:   Thu Jun 20 13:22:24 2024 -0700
+  Date:   Fri Jun 28 14:05:29 2024 -0700
   
-      fix: make '<' in type argument immediate
+      chore: extract address block member
 ---
 File: semgrep-grammars/src/semgrep-move-on-aptos/grammar.js
 Git repo name: ocaml-tree-sitter-semgrep
-Latest commit in repo: ca1e79162edf092683dce2deef0de2c4cddbb44b
+Latest commit in repo: b6960ca07d5bd45232cbbf8043ca7088d4bd0758
 Last change in file:
-  commit 32903f849d7fa3d9d4bf8c27b0e60ce495b8be25
+  commit b6960ca07d5bd45232cbbf8043ca7088d4bd0758
   Author: ArArgon <liaozping@gmail.com>
-  Date:   Mon Jun 24 11:26:08 2024 -0700
+  Date:   Tue Jul 9 15:31:06 2024 -0700
   
-      fix: support ellipsis statements
+      feat: more ellipsis support in field access
 ---

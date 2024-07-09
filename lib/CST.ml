@@ -8,18 +8,36 @@
 open! Sexplib.Conv
 open Tree_sitter_run
 
-type block_comment_content = Token.t
-
-type doc_line_comment = Token.t
-
-type pat_0o = Token.t (* pattern 0[oO] *)
-
 type tok_xdquot_pat_92a0a93_dquot = Token.t
+
+type pat_57a456d = Token.t (* pattern \d[\d_]* *)
+
+type imm_tok_prec_p2_slash = Token.t (* "/" *)
 
 type bool_literal = [
     `True of Token.t (* "true" *)
   | `False of Token.t (* "false" *)
 ]
+
+type pat_8bc5a9c = Token.t (* pattern [01][01_]* *)
+
+type block_comment_explicit = unit (* blank *)
+
+type reuseable_keywords = [
+    `For of Token.t (* "for" *)
+  | `While of Token.t (* "while" *)
+  | `Friend of Token.t (* "friend" *)
+]
+
+type pat_4fd4a56 = Token.t (* pattern .* *)
+
+type tok_bdquot_rep_choice_imm_tok_bslash_choice_pat_9c2bd89_dquot = Token.t
+
+type line_comment_explicit = unit (* blank *)
+
+type doc_line_comment = Token.t
+
+type pat_0x = Token.t (* pattern 0[xX] *)
 
 type number_type = [
     `U8 of Token.t (* "u8" *)
@@ -30,20 +48,6 @@ type number_type = [
   | `U256 of Token.t (* "u256" *)
 ]
 
-type pat_c1c0c3a = Token.t (* pattern [\da-fA-F][\da-fA-F_]* *)
-
-type pat_0x = Token.t (* pattern 0[xX] *)
-
-type block_comment_explicit = unit (* blank *)
-
-type imm_tok_lt = Token.t (* "<" *)
-
-type pat_9bd0c11 = Token.t (* pattern [0-7][0-7_]* *)
-
-type pat_0b = Token.t (* pattern 0[bB] *)
-
-type line_comment_explicit = unit (* blank *)
-
 type quantifier_directive = [
     `Exists of Token.t (* "exists" *)
   | `Forall of Token.t (* "forall" *)
@@ -51,29 +55,31 @@ type quantifier_directive = [
   | `Min of Token.t (* "min" *)
 ]
 
-type pat_57a456d = Token.t (* pattern \d[\d_]* *)
+type pat_9bd0c11 = Token.t (* pattern [0-7][0-7_]* *)
 
-type reuseable_keywords = [
-    `For of Token.t (* "for" *)
-  | `While of Token.t (* "while" *)
-  | `Friend of Token.t (* "friend" *)
-]
+type block_doc_comment_marker = Token.t
 
-type pat_4fd4a56 = Token.t (* pattern .* *)
+type pat_0b = Token.t (* pattern 0[bB] *)
 
 type imm_tok_prec_p1_pat_4fd4a56 = Token.t (* pattern .* *)
 
-type tok_bdquot_rep_choice_imm_tok_bslash_choice_pat_9c2bd89_dquot = Token.t
-
-type imm_tok_prec_p2_slash = Token.t (* "/" *)
+type pat_c1c0c3a = Token.t (* pattern [\da-fA-F][\da-fA-F_]* *)
 
 type identifier = Token.t
 
-type pat_8bc5a9c = Token.t (* pattern [01][01_]* *)
-
 type imm_tok_prec_p2_slashslash = Token.t (* "//" *)
 
-type block_doc_comment_marker = Token.t
+type pat_0o = Token.t (* pattern 0[oO] *)
+
+type imm_tok_lt = Token.t (* "<" *)
+
+type block_comment_content = Token.t
+
+type byte_string = [
+    `Tok_xdquot_pat_92a0a93_dquot of tok_xdquot_pat_92a0a93_dquot
+  | `Tok_bdquot_rep_choice_imm_tok_bslash_choice_pat_9c2bd89_dquot of
+      tok_bdquot_rep_choice_imm_tok_bslash_choice_pat_9c2bd89_dquot
+]
 
 type primitive_type = [
     `Num_type of number_type
@@ -99,44 +105,21 @@ type module_member_modifier = [
   | `Entry of Token.t (* "entry" *)
 ]
 
-type ability = [
-    `Choice_copy of [
-        `Copy of Token.t (* "copy" *)
-      | `Drop of Token.t (* "drop" *)
-      | `Store of Token.t (* "store" *)
-      | `Key of Token.t (* "key" *)
-    ]
-  | `Ellips of Token.t (* "..." *)
-]
-
-type byte_string = [
-    `Tok_xdquot_pat_92a0a93_dquot of tok_xdquot_pat_92a0a93_dquot
-  | `Tok_bdquot_rep_choice_imm_tok_bslash_choice_pat_9c2bd89_dquot of
-      tok_bdquot_rep_choice_imm_tok_bslash_choice_pat_9c2bd89_dquot
-]
-
-type spec_apply_fragment = [
-    `STAR of Token.t (* "*" *)
-  | `Id of identifier (*tok*)
-]
+type use_alias = (Token.t (* "as" *) * identifier (*tok*))
 
 type attribute_name = (
     identifier (*tok*)
   * (Token.t (* "::" *) * identifier (*tok*)) list (* zero or more *)
 )
 
-type use_alias = (Token.t (* "as" *) * identifier (*tok*))
-
 type ident_or_wildcard = [
     `Id of identifier (*tok*)
   | `STAR of Token.t (* "*" *)
 ]
 
-type number = [
-    `Pat_57a456d of pat_57a456d
-  | `Pat_0x_pat_c1c0c3a of (pat_0x * pat_c1c0c3a)
-  | `Pat_0b_pat_8bc5a9c of (pat_0b * pat_8bc5a9c)
-  | `Pat_0o_pat_9bd0c11 of (pat_0o * pat_9bd0c11)
+type spec_apply_fragment = [
+    `STAR of Token.t (* "*" *)
+  | `Id of identifier (*tok*)
 ]
 
 type line_comment = (
@@ -151,6 +134,23 @@ type line_comment = (
       | `Imm_tok_prec_p1_pat_4fd4a56 of imm_tok_prec_p1_pat_4fd4a56
     ]
 )
+
+type number = [
+    `Pat_57a456d of pat_57a456d
+  | `Pat_0x_pat_c1c0c3a of (pat_0x * pat_c1c0c3a)
+  | `Pat_0b_pat_8bc5a9c of (pat_0b * pat_8bc5a9c)
+  | `Pat_0o_pat_9bd0c11 of (pat_0o * pat_9bd0c11)
+]
+
+type ability = [
+    `Choice_copy of [
+        `Copy of Token.t (* "copy" *)
+      | `Drop of Token.t (* "drop" *)
+      | `Store of Token.t (* "store" *)
+      | `Key of Token.t (* "key" *)
+    ]
+  | `Ellips of Token.t (* "..." *)
+]
 
 type block_comment = (
     Token.t (* "/*" *)
@@ -171,6 +171,13 @@ type discouraged_name = [
   | `Reus_keywos of reuseable_keywords
 ]
 
+type use_member = [
+    `Id_opt_use_alias of (identifier (*tok*) * use_alias option)
+  | `Ellips of Token.t (* "..." *)
+]
+
+type numerical_addr = number
+
 type constraints = (
     Token.t (* ":" *)
   * ability
@@ -182,26 +189,9 @@ type abilities = (
   * (Token.t (* "," *) * ability) list (* zero or more *)
 )
 
-type use_member = [
-    `Id_opt_use_alias of (identifier (*tok*) * use_alias option)
-  | `Ellips of Token.t (* "..." *)
-]
-
-type numerical_addr = number
-
 type var_name = [
     `Id of identifier (*tok*)
   | `Disc_name of discouraged_name
-]
-
-type type_param = [
-    `Id_opt_consts of (identifier (*tok*) * constraints option)
-  | `Ellips of Token.t (* "..." *)
-]
-
-type leading_name_access = [
-    `Nume_addr of numerical_addr
-  | `Id of identifier (*tok*)
 ]
 
 type leading_name_access_wildcard = [
@@ -209,39 +199,14 @@ type leading_name_access_wildcard = [
   | `Choice_id of ident_or_wildcard
 ]
 
-type type_params = (
-    Token.t (* "<" *)
-  * (type_param * (Token.t (* "," *) * type_param) list (* zero or more *))
-      option
-  * Token.t (* "," *) option
-  * Token.t (* ">" *)
-)
-
-type struct_type_parameter = (Token.t (* "phantom" *) option * type_param)
-
-type name_access_chain = [
-    `Choice_id of var_name
-  | `Choice_lead_name_access_COLONCOLON_id_opt_COLONCOLON_id of (
-        [
-            `Lead_name_access of leading_name_access
-          | `Disc_name of discouraged_name
-        ]
-      * Token.t (* "::" *)
-      * identifier (*tok*)
-      * (Token.t (* "::" *) * identifier (*tok*)) option
-    )
+type leading_name_access = [
+    `Nume_addr of numerical_addr
+  | `Id of identifier (*tok*)
 ]
 
-type module_ident_ = (
-    leading_name_access * Token.t (* "::" *) * identifier (*tok*)
-)
-
-type value = [
-    `AT_lead_name_access of (Token.t (* "@" *) * leading_name_access)
-  | `Bool_lit of bool_literal
-  | `Num of numerical_addr
-  | `Typed_num of (numerical_addr * number_type)
-  | `Byte_str of byte_string
+type type_param = [
+    `Id_opt_consts of (identifier (*tok*) * constraints option)
+  | `Ellips of Token.t (* "..." *)
 ]
 
 type name_access_chain_wildcard = [
@@ -260,27 +225,45 @@ type name_access_chain_wildcard = [
     )
 ]
 
-type spec_apply_pattern = (
-    [ `Public of Token.t (* "public" *) | `Inte of Token.t (* "internal" *) ]
-      option
-  * spec_apply_fragment list (* one or more *)
-  * type_params option
+type module_path = (
+    (leading_name_access * Token.t (* "::" *)) option
+  * identifier (*tok*)
 )
 
-type struct_type_params = (
-    Token.t (* "<" *)
-  * (
-        struct_type_parameter
-      * (Token.t (* "," *) * struct_type_parameter) list (* zero or more *)
+type value = [
+    `AT_lead_name_access of (Token.t (* "@" *) * leading_name_access)
+  | `Bool_lit of bool_literal
+  | `Num of numerical_addr
+  | `Typed_num of (numerical_addr * number_type)
+  | `Byte_str of byte_string
+]
+
+type name_access_chain = [
+    `Choice_id of var_name
+  | `Choice_lead_name_access_COLONCOLON_id_opt_COLONCOLON_id of (
+        [
+            `Lead_name_access of leading_name_access
+          | `Disc_name of discouraged_name
+        ]
+      * Token.t (* "::" *)
+      * identifier (*tok*)
+      * (Token.t (* "::" *) * identifier (*tok*)) option
     )
+]
+
+type module_ident = (
+    leading_name_access * Token.t (* "::" *) * identifier (*tok*)
+)
+
+type type_params = (
+    Token.t (* "<" *)
+  * (type_param * (Token.t (* "," *) * type_param) list (* zero or more *))
       option
   * Token.t (* "," *) option
   * Token.t (* ">" *)
 )
 
-type friend_decl = (
-    Token.t (* "friend" *) * name_access_chain * Token.t (* ";" *)
-)
+type struct_type_parameter = (Token.t (* "phantom" *) option * type_param)
 
 type anon_type__rep_COMMA_type__ac59fb8 = (
     type__
@@ -328,9 +311,18 @@ and type_args = (
   * Token.t (* ">" *)
 )
 
+type friend_decl = (
+    Token.t (* "friend" *) * name_access_chain * Token.t (* ";" *)
+)
+
+type anon_choice_value_f266929 = [
+    `Value of value
+  | `Name_access_chain of name_access_chain
+]
+
 type use_decl = (
     Token.t (* "use" *)
-  * module_ident_
+  * module_ident
   * [
         `Opt_use_alias of use_alias option
       | `COLONCOLON_use_member of (Token.t (* "::" *) * use_member)
@@ -349,17 +341,28 @@ type use_decl = (
   * Token.t (* ";" *)
 )
 
-type attribute_val = [
-    `Value of value
-  | `Name_access_chain of name_access_chain
-]
-
-type anon_spec_apply_pat_rep_COMMA_spec_apply_pat_d9a21d6 = (
-    spec_apply_pattern
-  * (Token.t (* "," *) * spec_apply_pattern) list (* zero or more *)
+type spec_apply_pattern = (
+    [ `Public of Token.t (* "public" *) | `Inte of Token.t (* "internal" *) ]
+      option
+  * spec_apply_fragment list (* one or more *)
+  * type_params option
 )
 
-type struct_def_name = (identifier (*tok*) * struct_type_params option)
+type struct_type_params = (
+    Token.t (* "<" *)
+  * (
+        struct_type_parameter
+      * (Token.t (* "," *) * struct_type_parameter) list (* zero or more *)
+    )
+      option
+  * Token.t (* "," *) option
+  * Token.t (* ">" *)
+)
+
+type parameter = [
+    `Id_COLON_type_ of (identifier (*tok*) * Token.t (* ":" *) * type__)
+  | `Ellips of Token.t (* "..." *)
+]
 
 type bind = [
     `Var_name of var_name
@@ -387,7 +390,7 @@ and bind_fields = (
   * Token.t (* "}" *)
 )
 
-type parameter = [
+type field_annot = [
     `Id_COLON_type_ of (identifier (*tok*) * Token.t (* ":" *) * type__)
   | `Ellips of Token.t (* "..." *)
 ]
@@ -407,14 +410,48 @@ type address_specifier = [
     )
 ]
 
-type field_annot = [
-    `Id_COLON_type_ of (identifier (*tok*) * Token.t (* ":" *) * type__)
+type attribute_val = [
+    `Choice_value of anon_choice_value_f266929
   | `Ellips of Token.t (* "..." *)
 ]
 
 type spec_pragma_prop = (
     var_name
-  * (Token.t (* "=" *) * attribute_val) option
+  * (Token.t (* "=" *) * anon_choice_value_f266929) option
+)
+
+type anon_spec_apply_pat_rep_COMMA_spec_apply_pat_d9a21d6 = (
+    spec_apply_pattern
+  * (Token.t (* "," *) * spec_apply_pattern) list (* zero or more *)
+)
+
+type struct_def_name = (identifier (*tok*) * struct_type_params option)
+
+type parameters = (
+    Token.t (* "(" *)
+  * (parameter * (Token.t (* "," *) * parameter) list (* zero or more *))
+      option
+  * Token.t (* "," *) option
+  * Token.t (* ")" *)
+)
+
+type anon_bind_rep_COMMA_bind_38cc8c1 = (
+    bind
+  * (Token.t (* "," *) * bind) list (* zero or more *)
+)
+
+type struct_body = (
+    Token.t (* "{" *)
+  * (field_annot * (Token.t (* "," *) * field_annot) list (* zero or more *))
+      option
+  * Token.t (* "," *) option
+  * Token.t (* "}" *)
+)
+
+type access_specifier = (
+    name_access_chain_wildcard
+  * type_args option
+  * (Token.t (* "(" *) * address_specifier * Token.t (* ")" *)) option
 )
 
 type anon_attr_rep_COMMA_attr_246bec5 = (
@@ -439,47 +476,30 @@ and attribute = [
   | `Ellips of Token.t (* "..." *)
 ]
 
-type anon_bind_rep_COMMA_bind_38cc8c1 = (
-    bind
-  * (Token.t (* "," *) * bind) list (* zero or more *)
-)
-
-type parameters = (
-    Token.t (* "(" *)
-  * (parameter * (Token.t (* "," *) * parameter) list (* zero or more *))
-      option
-  * Token.t (* "," *) option
-  * Token.t (* ")" *)
-)
-
-type access_specifier = (
-    name_access_chain_wildcard
-  * type_args option
-  * (Token.t (* "(" *) * address_specifier * Token.t (* ")" *)) option
-)
-
-type struct_body = (
-    Token.t (* "{" *)
-  * (field_annot * (Token.t (* "," *) * field_annot) list (* zero or more *))
-      option
-  * Token.t (* "," *) option
-  * Token.t (* "}" *)
-)
-
 type anon_spec_pragma_prop_rep_COMMA_spec_pragma_prop_588d25f = (
     spec_pragma_prop
   * (Token.t (* "," *) * spec_pragma_prop) list (* zero or more *)
 )
 
-type attributes =
-  (
-      Token.t (* "#" *)
-    * Token.t (* "[" *)
-    * anon_attr_rep_COMMA_attr_246bec5 option
-    * Token.t (* "," *) option
-    * Token.t (* "]" *)
-  )
-    list (* one or more *)
+type struct_signature = (
+    Token.t (* "struct" *)
+  * struct_def_name
+  * (Token.t (* "has" *) * abilities) option
+)
+
+type spec_func_signatures = (
+    identifier (*tok*)
+  * type_params option
+  * parameters
+  * Token.t (* ":" *)
+  * type__
+)
+
+type spec_target_signature_opt = (
+    type_params option
+  * parameters
+  * (Token.t (* ":" *) * type__) option
+)
 
 type bind_list = [
     `Bind of bind
@@ -498,32 +518,21 @@ type lambda_bind_list = (
   * Token.t (* "|" *)
 )
 
-type spec_func_signatures = (
-    identifier (*tok*)
-  * type_params option
-  * parameters
-  * Token.t (* ":" *)
-  * type__
-)
-
-type spec_target_signature_opt = (
-    type_params option
-  * parameters
-  * (Token.t (* ":" *) * type__) option
-)
-
 type access_specifier_list = (
     access_specifier
   * (Token.t (* "," *) * access_specifier) list (* zero or more *)
   * Token.t (* "," *) option
 )
 
-type struct_decl = (
-    Token.t (* "struct" *)
-  * struct_def_name
-  * (Token.t (* "has" *) * abilities) option
-  * [ `Struct_body of struct_body | `SEMI of Token.t (* ";" *) ]
-)
+type attributes =
+  (
+      Token.t (* "#" *)
+    * Token.t (* "[" *)
+    * anon_attr_rep_COMMA_attr_246bec5 option
+    * Token.t (* "," *) option
+    * Token.t (* "]" *)
+  )
+    list (* one or more *)
 
 type condition_props = (
     Token.t (* "[" *)
@@ -539,7 +548,10 @@ type spec_pragma = (
   * Token.t (* ";" *)
 )
 
-type script_user_decl = (attributes option * use_decl)
+type struct_decl = (
+    struct_signature
+  * [ `Struct_body of struct_body | `SEMI of Token.t (* ";" *) ]
+)
 
 type spec_block_target = [
     `Id_opt_spec_target_sign_opt of (
@@ -569,6 +581,11 @@ type specifier = [
         list (* one or more *)
 ]
 
+type script_use_decl = [
+    `Opt_attris_use_decl of (attributes option * use_decl)
+  | `Ellips of Token.t (* "..." *)
+]
+
 type aborts_if = (
     Token.t (* "aborts_if" *)
   * condition_props option
@@ -587,16 +604,6 @@ and aborts_with_or_modifies = (
 )
 
 and anon_choice_blk_f78fea4 = [ `Blk of block | `SEMI of Token.t (* ";" *) ]
-
-and anon_choice_expr_ae0e30e = [
-    `Expr of expr
-  | `Let_expr of (
-        Token.t (* "let" *)
-      * bind_list
-      * (Token.t (* ":" *) * type__) option
-      * (Token.t (* "=" *) * expr) option
-    )
-]
 
 and anon_expr_rep_COMMA_expr_8e432c6 = (
     expr
@@ -674,6 +681,7 @@ and dot_or_index_chain = [
         dot_or_index_chain * Token.t (* "[" *) * expr * Token.t (* "]" *)
     )
   | `Term of term
+  | `Field_access_ellips_expr of field_access_ellipsis_expr
 ]
 
 and emits = (
@@ -692,7 +700,6 @@ and expr = [
   | `Lambda_bind_list_expr of (lambda_bind_list * expr)
   | `Ellips of Token.t (* "..." *)
   | `Deep_ellips of deep_ellipsis
-  | `Field_access_ellips_expr of field_access_ellipsis_expr
 ]
 
 and expr_field = [
@@ -778,8 +785,18 @@ and return_expr = [
   | `Ret_expr of (Token.t (* "return" *) * expr)
 ]
 
+and semgrep_expression = [
+    `Expr of expr
+  | `Let_expr of (
+        Token.t (* "let" *)
+      * bind_list
+      * (Token.t (* ":" *) * type__) option
+      * (Token.t (* "=" *) * expr) option
+    )
+]
+
 and sequence_item = [
-    `Choice_expr_SEMI of (anon_choice_expr_ae0e30e * Token.t (* ";" *))
+    `Choice_expr_SEMI of (semgrep_expression * Token.t (* ";" *))
   | `Ellips of Token.t (* "..." *)
 ]
 
@@ -941,6 +958,8 @@ and term = [
   | `Ret_expr of return_expr
   | `Abort_expr of (Token.t (* "abort" *) * expr)
   | `For_loop_expr of for_loop_expr
+  | `Ellips of Token.t (* "..." *)
+  | `Deep_ellips of deep_ellipsis
 ]
 
 and triggers =
@@ -969,14 +988,7 @@ and unary_expr = [
     )
 ]
 
-type constant_decl = (
-    Token.t (* "const" *) * identifier (*tok*) * Token.t (* ":" *) * type__
-  * Token.t (* "=" *) * expr * Token.t (* ";" *)
-)
-
-type script_spec_block = (attributes option * spec_loop_invariant)
-
-type function_decl = (
+type function_signature = (
     Token.t (* "inline" *) option
   * Token.t (* "fun" *)
   * identifier (*tok*)
@@ -984,16 +996,24 @@ type function_decl = (
   * parameters
   * (Token.t (* ":" *) * type__) option
   * specifier option
-  * anon_choice_blk_f78fea4
 )
 
-type script_constant_decl = (attributes option * constant_decl)
+type script_spec_block = [
+    `Opt_attris_spec_blk of (attributes option * spec_loop_invariant)
+  | `Ellips of Token.t (* "..." *)
+]
 
-type script_func_decl = (
-    attributes option
-  * module_member_modifier list (* zero or more *)
-  * function_decl
+type constant_decl = (
+    Token.t (* "const" *) * identifier (*tok*) * Token.t (* ":" *) * type__
+  * Token.t (* "=" *) * expr * Token.t (* ";" *)
 )
+
+type function_decl = (function_signature * anon_choice_blk_f78fea4)
+
+type script_constant_decl = [
+    `Opt_attris_cst_decl of (attributes option * constant_decl)
+  | `Ellips of Token.t (* "..." *)
+]
 
 type declaration = [
     `Opt_attris_choice_use_decl of (
@@ -1017,30 +1037,47 @@ type declaration = [
   | `Ellips of Token.t (* "..." *)
 ]
 
+type script_func_decl = [
+    `Opt_attris_rep_module_member_modi_func_decl of (
+        attributes option
+      * module_member_modifier list (* zero or more *)
+      * function_decl
+    )
+  | `Ellips of Token.t (* "..." *)
+]
+
+type module_ = (
+    [ `Spec of Token.t (* "spec" *) | `Module_kw of Token.t (* "module" *) ]
+  * module_path
+  * Token.t (* "{" *)
+  * declaration list (* zero or more *)
+  * Token.t (* "}" *)
+)
+
+type semgrep_statement =
+  [ `Seq_item of sequence_item | `Decl of declaration ]
+    list (* one or more *)
+
 type script = (
     Token.t (* "script" *)
   * Token.t (* "{" *)
-  * script_user_decl list (* zero or more *)
+  * script_use_decl list (* zero or more *)
   * script_constant_decl list (* zero or more *)
   * script_func_decl
   * script_spec_block list (* zero or more *)
   * Token.t (* "}" *)
 )
 
-type module_ = (
-    [ `Spec of Token.t (* "spec" *) | `Module_id of Token.t (* "module" *) ]
-  * (leading_name_access * Token.t (* "::" *)) option
-  * identifier (*tok*)
-  * Token.t (* "{" *)
-  * declaration list (* zero or more *)
-  * Token.t (* "}" *)
-)
+type address_member = [
+    `Opt_attris_module of (attributes option * module_)
+  | `Ellips of Token.t (* "..." *)
+]
 
 type address_block = (
     Token.t (* "address" *)
   * leading_name_access
   * Token.t (* "{" *)
-  * (attributes option * module_) list (* zero or more *)
+  * address_member list (* zero or more *)
   * Token.t (* "}" *)
 )
 
@@ -1055,21 +1092,23 @@ type source_file = [
           ]
       )
         list (* zero or more *)
-  | `Semg_exp of (
-        Token.t (* "__SEMGREP_EXPRESSION" *) * anon_choice_expr_ae0e30e
-    )
-  | `Semg_stmt of (
-        Token.t (* "__SEMGREP_STATEMENT" *)
-      * [ `Seq_item of sequence_item | `Cst_decl of constant_decl ]
-          list (* one or more *)
+  | `Semg_exp of semgrep_expression
+  | `Semg_stmt of semgrep_statement
+  | `Semg_part of (
+        attributes option
+      * module_member_modifier list (* zero or more *)
+      * [
+            `Func_sign of function_signature
+          | `Struct_sign of struct_signature
+        ]
     )
 ]
 
-type module_ident (* inlined *) = Token.t (* "module" *)
+type module_keyword (* inlined *) = Token.t (* "module" *)
+
+type error_sentinel (* inlined *) = Token.t
 
 type signer (* inlined *) = Token.t (* "signer" *)
-
-type phantom (* inlined *) = Token.t (* "phantom" *)
 
 type visibility (* inlined *) = (
     Token.t (* "public" *)
@@ -1084,7 +1123,7 @@ type visibility (* inlined *) = (
       option
 )
 
-type error_sentinel (* inlined *) = Token.t
+type phantom (* inlined *) = Token.t (* "phantom" *)
 
 type ellipsis (* inlined *) = Token.t (* "..." *)
 
@@ -1093,9 +1132,9 @@ type comments (* inlined *) = [
   | `Blk_comm_expl of block_comment_explicit
 ]
 
-type copy_expr (* inlined *) = (Token.t (* "copy" *) * identifier (*tok*))
-
 type move_expr (* inlined *) = (Token.t (* "move" *) * identifier (*tok*))
+
+type copy_expr (* inlined *) = (Token.t (* "copy" *) * identifier (*tok*))
 
 type dummy_alias1 (* inlined *) = line_comment
 
@@ -1118,12 +1157,12 @@ type tuple_type (* inlined *) = (
   * Token.t (* ")" *)
 )
 
-type var (* inlined *) = (name_access_chain * type_args option)
-
 type typed_metavariable (* inlined *) = (
     Token.t (* "(" *) * identifier (*tok*) * Token.t (* ":" *) * type__
   * Token.t (* ")" *)
 )
+
+type var (* inlined *) = (name_access_chain * type_args option)
 
 type abort_expr (* inlined *) = (Token.t (* "abort" *) * expr)
 
@@ -1219,12 +1258,8 @@ type while_expr (* inlined *) = (
   * spec_loop_invariant option
 )
 
-type semgrep_expression (* inlined *) = (
-    Token.t (* "__SEMGREP_EXPRESSION" *) * anon_choice_expr_ae0e30e
-)
-
-type semgrep_statement (* inlined *) = (
-    Token.t (* "__SEMGREP_STATEMENT" *)
-  * [ `Seq_item of sequence_item | `Cst_decl of constant_decl ]
-      list (* one or more *)
+type semgrep_partial (* inlined *) = (
+    attributes option
+  * module_member_modifier list (* zero or more *)
+  * [ `Func_sign of function_signature | `Struct_sign of struct_signature ]
 )
