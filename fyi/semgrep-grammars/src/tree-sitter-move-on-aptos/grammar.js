@@ -53,10 +53,14 @@ module.exports = grammar({
     word: $ => $.identifier,
 
     conflicts: $ => [
-        [$.primitive_type, $.vector_value_expr],
         [$._reuseable_keywords, $.for_loop_expr],
         [$.discouraged_name, $._type],
         [$.var, $.pack_expr],
+        [$._quantifier_directive, $.quantifier],
+        [$.var, $.call_expr],
+        [$._reuseable_keywords, $.match_expr],
+        [$.enum_decl, $._enum_signature],
+        [$.struct_decl, $._struct_signature],
     ],
 
     extras: $ => [
@@ -80,6 +84,11 @@ module.exports = grammar({
         // If a syntax error is encountered during regular parsing, Tree-sitter’s first action during error
         // recovery will be to call the external scanner’s scan function with all tokens marked valid.
         $._error_sentinel,
+    ],
+
+    precedences: $ => [
+        [$.vector_value_expr, $.primitive_type],
+        [$.var_name, $.name_access_chain],
     ],
 
     rules: {
@@ -109,7 +118,7 @@ module.exports = grammar({
         var_name: $ => choice($.identifier, $.discouraged_name),
         // FIXME: this is a workaround for the existing chaotic naming scheme. Keywords are not supposed to be identifiers.
         discouraged_name: $ => choice($.primitive_type, $._quantifier_directive, $._reuseable_keywords),
-        _reuseable_keywords: _ => choice('for', 'while', 'friend'),
+        _reuseable_keywords: _ => choice('for', 'while', 'friend', 'match'),
 
         number: _ => choice(
             /\d[\d_]*/,
@@ -134,14 +143,17 @@ module.exports = grammar({
         _leading_name_access_wildcard: $ => choice($.numerical_addr, $._ident_or_wildcard),
 
         // NameAccessChain = <Identifier>
-        //                 | <LeadingNameAccess> "::" <Identifier> ( "::" <Identifier> )?
+        //                 | <LeadingNameAccess> "::" <Identifier> ( "::" <Identifier> ( "::" <Identifier> )? )?
         // `Identifier` can be `*` if `wildcard = true`
         name_access_chain: $ => choice(
             field('name', choice($.identifier, $.discouraged_name)),
             seq(
                 choice($._leading_name_access, $.discouraged_name),
                 seq('::', field('access_two', $.identifier)),
-                optional(seq('::', field('access_three', $.identifier)))
+                optional(seq(
+                    '::', field('access_three', $.identifier),
+                    optional(seq('::', field('access_four', $.identifier))),
+                ))
             ),
         ),
         name_access_chain_wildcard: $ => choice(
@@ -149,7 +161,10 @@ module.exports = grammar({
             seq(
                 choice($._leading_name_access_wildcard, $.discouraged_name),
                 seq('::', field('access_two', $._ident_or_wildcard)),
-                optional(seq('::', field('access_three', $._ident_or_wildcard)))
+                optional(seq(
+                    '::', field('access_three', $._ident_or_wildcard),
+                    optional(seq('::', field('access_four', $._ident_or_wildcard))),
+                ))
             ),
         ),
 
@@ -285,8 +300,8 @@ module.exports = grammar({
 
         // Parse an expression term optionally followed by a chain of dot or index accesses:
         //      DotOrIndexChain =
-        //          <DotOrIndexChain> "." <Identifier> [ ["::" <TypeArgs>]  <CallArgs> ]
-        //          | <DotOrIndexChain> "[" <Exp> "]"                      spec only
+        //          <DotOrIndexChain> "." <IdentifierOrAnonField> [ ["::" <TypeArgs>]  <CallArgs> ]
+        //          | <DotOrIndexChain> "[" <Exp> "]"
         //          | <Term>
         _dot_or_index_chain: $ => choice(
             $.access_field,
@@ -295,14 +310,19 @@ module.exports = grammar({
             alias($.term, 'expr_term'),
         ),
         receiver_call: $ => prec.left(expr_precedence.CALL, seq(
-            field('receiver', $._dot_or_index_chain), '.', field('func', $.identifier),
+            field('receiver', $._dot_or_index_chain), '.', field('func', $._identifier_or_anon_field),
             optional(field('type_generics', seq('::', $.type_args))),
             field('arguments', $.call_args),
         )),
         mem_access: $ => prec.left(expr_precedence.CALL, seq($._dot_or_index_chain, '[', field('index', $._expr), ']')),
         access_field: $ => prec.left(expr_precedence.FIELD, seq(
-            field('object', $._dot_or_index_chain), '.', field('field', $.identifier),
+            field('object', $._dot_or_index_chain), '.', field('field', $._identifier_or_anon_field),
         )),
+
+        // Parse an identifier or an positional field
+        //      IdentifierOrAnonField = <Identifier> | (0-9)+
+        _identifier_or_anon_field: $ => choice($.identifier, $.anon_field_index),
+        anon_field_index: $ => /\d+/,
 
         // Parse an expression term:
         //      Term =
@@ -321,6 +341,7 @@ module.exports = grammar({
         //          | "while" "(" <Exp> ")" <Exp> <SpecLoopInvariant>?
         //          | "loop" <Exp>
         //          | "loop" "{" <Exp> "}"
+        //          | <Match>
         //          | "return" "{" <Exp> "}"
         //          | "return" <Exp>?
         //          | "abort" "{" <Exp> "}"
@@ -348,6 +369,7 @@ module.exports = grammar({
 
             // control flow expressions
             $.if_expr,
+            $.match_expr,
             $.while_expr,
             $.loop_expr,
             $.return_expr,
@@ -360,6 +382,19 @@ module.exports = grammar({
         type_hint_expr: $ => seq('(', $._expr, ':', $.type, ')'),
         cast_expr: $ => seq('(', $._expr, 'as', $.type, ')'),
         parenthesized_expr: $ => seq('(', $._expr, ')'),
+
+        // Match = "match" "(" <Exp> ")" "{" ( <MatchArm> ","? )* "}"
+        match_expr: $ => seq(
+            'match', '(', field('value', $._expr), ')',
+            '{', repeat(seq($.match_arm, optional(','))), '}'
+        ),
+
+        // MatchArm = <Bind> ( "if" <Exp> )? "=>" <Exp>
+        match_arm: $ => seq(
+            alias($.bind_list, $.pattern),
+            optional(seq('if', alias($._expr, $.condition))),
+            '=>', alias($._control_body, $.result),
+        ),
 
         // Control flow expressions:
         if_expr: $ => prec.right(seq(
@@ -528,7 +563,7 @@ module.exports = grammar({
                 $.spec_invariant,
 
                 // TODO(doc): doc comments
-                seq(repeat($.module_member_modifier), choice($.constant_decl, $.struct_decl, $.function_decl)),
+                seq(repeat($.module_member_modifier), choice($.constant_decl, $._struct_or_enum_decl, $.function_decl)),
             )
         ),
 
@@ -695,7 +730,7 @@ module.exports = grammar({
             ';',
         ),
         // Parse a function pattern:
-        //     SpecApplyPattern = <Visibility>? <SpecApplyFragment>+ <OptionalTypeArgs>
+        //     SpecApplyPattern = ( "public" | "internal" )? <SpecApplyFragment>+ <OptionalTypeArgs>
         //     SpecApplyFragment = <Identifier> | "*"
         _spec_apply_pattern: $ => seq(
             optional(field('visibility', choice('public', 'internal'))),
@@ -746,8 +781,8 @@ module.exports = grammar({
             ';'
         ),
 
-        // Visibility = "public" ( "(" "script" | "friend" ")" )?
-        visibility: $ => seq('public', optional(seq('(', choice('script', 'friend'), ')'))),
+        // Visibility = "public" ( "(" "script" | "friend" | "package" ")" )?
+        visibility: $ => seq('public', optional(seq('(', choice('script', 'friend', 'package'), ')'))),
 
         // ModuleMemberModifier = <Visibility> | "native"
         module_member_modifier: $ => choice($.visibility, 'native', 'entry'),
@@ -853,22 +888,33 @@ module.exports = grammar({
             ),
         ),
 
+        // StructOrEnumDecl = <StructDecl> | <EnumDecl>
+        _struct_or_enum_decl: $ => choice(
+            $.struct_decl,
+            $.enum_decl,
+        ),
+
         // StructDecl =
-        //     "struct" <StructDefName> ("has" <Ability> (, <Ability>)+)?
-        //     ("{" Comma<FieldAnnot> "}" | ";")
+        //     | "struct" <StructDefName> <Abilities>? (<StructBody> | ";")
+        //     | "struct" <StructDefName> <StructBody> <Abilities>? ";"                 // alternative syntax
+        //     | "struct" <StructDefName> "(" Comma<Type> ")" <Abilities>? ";"          // positional fields
+        //
+        // StructBody = "{" Comma<FieldAnnot> "}"
         // StructDefName        = <Identifier> <StructTypeParameter>?
         // StructTypeParameter  = '<' Comma<TypeParameterWithPhantomDecl> '>'
         // TypeParameterWithPhantomDecl = "phantom"? <TypeParameter>
-        struct_decl: $ => seq(
-            $._struct_signature,
-            choice(alias($.struct_body, $.body), ';'),
+        struct_decl: $ => choice(
+            seq($._struct_signature, choice(alias($.struct_body, $.body), ';')),
+            seq('struct', $._struct_def_name, $.struct_body, optional($.abilities), ';'),
+            seq('struct', $._struct_def_name, $.anon_fields, optional($.abilities), ';'),
         ),
         _struct_signature: $ => seq(
-            'struct',
-            $._struct_def_name,
-            optional(seq('has', $.abilities)),
+            'struct', $._struct_def_name, optional($.abilities),
         ),
+
         struct_body: $ => seq('{', sepByComma($.field_annot), '}'),
+        anon_fields: $ => seq('(', sepByComma($.type), ')'),        // a.k.a. positional fields
+
         _struct_def_name: $ => seq(
             field('name', $.identifier),
             optional(alias($._struct_type_params, $.type_params)),
@@ -883,14 +929,46 @@ module.exports = grammar({
             field('field', $.identifier), ':', $.type
         ),
 
+        // EnumDecl =
+        //     "enum" <StructDefName> <Abilities>? "{" Comma<EnumVariant> "}"
+        //   | "enum" <StructDefName> "{" Comma<EnumVariant> "}" <Abilities>? ";"
+        // Notice:
+        //     If the variant is based on a block, we allow but do not require
+        //     a `,`. Otherwise, a comma is required.
+        enum_decl: $ => choice(
+            seq($._enum_signature, $.enum_body),
+            seq("enum", $._struct_def_name, $.enum_body, optional($.abilities), ';'),
+        ),
+
+        _enum_signature: $ => seq('enum', $._struct_def_name, optional($.abilities),),
+
+        enum_body: $ => seq('{', repeat($._variant), optional(field('variant', $.identifier)), '}'),
+        _variant: $ => choice(
+            seq($.enum_variant, optional(',')),
+            seq(field('variant', $.identifier), ','),
+        ),
+
+        // EnumVariant =
+        //       <Identifier> "{" Comma<FieldAnnot> "}"
+        //     | <Identifier> "(" Comma<Type> ")"    // positional fields
+        enum_variant: $ => seq(
+            field('variant', $.identifier),
+            choice(
+                $.struct_body,
+                $.anon_fields,
+            ),
+        ),
+
         // Parse a type ability
         //      Ability =
         //            "copy"
         //          | "drop"
         //          | "store"
         //          | "key"
+        //
+        //      Abilities = "has" Comma<Ability>
         ability: $ => choice('copy', 'drop', 'store', 'key'),
-        abilities: $ => sepBy1(',', $.ability),
+        abilities: $ => seq('has', sepBy1(',', $.ability)),
 
         // SequenceItem = <Exp> | "let" <BindList> (":" <Type>)? ("=" <Exp>)?
         _sequence_item: $ => seq(choice(
@@ -910,10 +988,20 @@ module.exports = grammar({
 
         // Bind = <Var>
         //      | <NameAccessChain> <OptionalTypeArgs> "{" Comma<BindField> "}"
+        //      | <NameAccessChain> <OptionalTypeArgs> "(" Comma<Bind> "," ")"      enum & positional fields, v2 only
+        //      | <NameAccessChain> <OptionalTypeArgs>                              enum, v2 only
         _bind: $ => choice(
             field('variable', $.var_name),
-            seq(field('struct', $.name_access_chain), optional($.type_args), alias($._bind_fields, $.fields)),
+            seq(
+                field('struct', $.name_access_chain),
+                optional($.type_args),
+                optional(choice(
+                    alias($._bind_fields, $.fields),
+                    alias($._bind_tuple, $.tuple),
+                )),
+            ),
         ),
+        _bind_tuple: $ => seq('(', sepByComma($._bind), ')'),
         _bind_fields: $ => seq('{', sepByComma($.bind_field), '}'),
 
         // OptionalTypeArgs = '<' Comma<Type> ">" | <empty>
